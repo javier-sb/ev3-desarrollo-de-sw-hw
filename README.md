@@ -6,7 +6,7 @@ Se desarrolló un sistema de adquisición de datos capaz de capturar señales an
 
 El flujo general de la información se muestra a continuación:
 
-**Acelerómetro --> ESP32 --> Broker MQTT --> Aplicación Python --> PostgreSQL**
+**Acelerómetro --> ESP32 --> Broker MQTT --> Aplicación Python --> PostgreSQL (Supabase)**
 
 ## Rol de la tarjeta ESP32
 
