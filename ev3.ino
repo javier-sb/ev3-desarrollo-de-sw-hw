@@ -20,6 +20,7 @@ const char* ap_password = "daq12345";
 const char* wifi_ssid = "tsct";
 const char* wifi_password = "12345678";
 
+
 // ==========================
 // MQTT
 // ==========================
@@ -65,6 +66,25 @@ struct Sample {
 
 Sample buffer[BUFFER_SIZE];
 int writeIndex = 0;
+
+// ==========================
+// CMD
+// ==========================
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  char msg[50];
+  int i = 0;
+
+  for (; i < length && i < 49; i++) {
+    msg[i] = (char)payload[i];
+  }
+  msg[i] = '\0';
+
+  if (strcmp(msg, "restart") == 0) {
+    Serial.println("CMD: restart");
+    ESP.restart();
+  }
+}
 
 // ==========================
 // WiFi
@@ -119,6 +139,7 @@ void ensureMQTT() {
 
   if (mqtt.connect(clientId.c_str())) {
     Serial.println("OK");
+    mqtt.subscribe("lab/daq/nano1/cmd");
   } else {
     Serial.print("FALLO: ");
     Serial.println(mqtt.state());
@@ -253,6 +274,8 @@ void setup() {
 
   server.on("/", handleRoot);
   server.begin();
+
+  mqtt.setCallback(callback);
 }
 
 // ==========================
