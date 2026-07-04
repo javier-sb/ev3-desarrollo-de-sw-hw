@@ -8,9 +8,21 @@ El flujo general de la información se muestra a continuación:
 
 **Acelerómetro --> ESP32 --> Broker MQTT --> Aplicación Python --> PostgreSQL**
 
+## Rol de la tarjeta ESP32
+
+El ESP32 constituye el nodo principal de adquisición, monitoreo y control del sistema IoT. Su función es desacoplar completamente la captura de datos del procesamiento y almacenamiento, delegando estas tareas a servicios externos.
+
+En este sistema, el ESP32 cumple los siguientes roles:
+
+- Adquisición de señales analógicas desde un acelerómetro (ejes X, Y, Z).
+- Publicación de datos mediante MQTT hacia un broker central.
+- Implementación de un monitor web embebido que permite visualizar en tiempo real el estado del sistema y las últimas muestras recibidas, además de el status de MQTT y Wi-Fi.
+- Sistema de actuación mediante comandos remotos, permitiendo el reinicio del dispositivo vía MQTT.
+- Indicadores LED para visualización del estado de conectividad (WiFi, MQTT y operación general).
+
 ### Adquisición y transmisión de datos
 
-El ESP32 adquiere tres canales analógicos correspondientes a los ejes **X**, **Y** y **Z** del acelerómetro a una frecuencia de **200 Hz**. Cada muestra se encapsula en un mensaje con formato JSON y se publica mediante MQTT en el tópico:
+El ESP32 adquiere tres canales analógicos correspondientes a los ejes **X**, **Y** y **Z** del acelerómetro a una frecuencia de **200 Hz**. Cada muestra se encapsula en formato JSON y se publica mediante MQTT en el tópico:
 
 ```text
 lab/daq/nano1/raw
@@ -31,6 +43,12 @@ Una aplicación desarrollada en Python actúa como cliente MQTT, suscribiéndose
 Como complemento, el ESP32 incorpora un servidor web embebido que permite visualizar el estado del sistema y las últimas muestras adquiridas desde cualquier navegador conectado a la red, ya sea directamente al Access Point (AP) del ESP32 o el Wi-Fi del servidor con Mosquitto. Además, se implementó un sistema de indicadores LED para informar el estado de la conectividad (Wi-Fi, punto de acceso y comunicación MQTT), facilitando la supervisión del funcionamiento del dispositivo.
 
 <img width="1919" height="1170" alt="AP_ESP32" src="https://github.com/user-attachments/assets/543c3b76-294e-4270-a734-f9ec7454f5e0" />
+
+### Flask
+
+Se desarrolló una aplicación adicional en Flask que actúa como interfaz de monitoreo en tiempo real tipo terminal del servidor. Esta permite visualizar los últimos mensajes recibidos vía MQTT y enviar comandos de control al ESP32, como el reinicio remoto del dispositivo.
+
+<img width="400" alt="MQTT_live_term" src="https://github.com/user-attachments/assets/052bc24d-cd82-4602-88cb-b47fab3ffe62" />
 
 ### Demo
 
@@ -66,6 +84,7 @@ Esta arquitectura desacopla la adquisición de datos del almacenamiento, permiti
 - Librerías de Python:
   - paho-mqtt
   - psycopg2
+  - flask
 
 ### 1. Clonar el repositorio
 
@@ -102,7 +121,7 @@ Modificar en el archivo `.ino` los siguientes parámetros:
 
 Compilar y cargar el firmware al ESP32.
 
-### 5. Configurar la aplicación Python
+### 5. Configurar la aplicación Python (para base de datos PostgreSQL)
 
 Editar la variable `DB_URL` con las credenciales de PostgreSQL.
 
@@ -121,6 +140,7 @@ pip install -r requirements.txt
 3. Verificar que el LED de estado sea verde.
 4. Ejecutar la aplicación Python.
 5. Comprobar que las muestras comiencen a almacenarse en PostgreSQL.
+6. De ser necesario utilizar la aplicación en Flask para reiniciar el sistema de forma remota
 
 ### 7. Visualización
 
