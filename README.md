@@ -48,3 +48,80 @@ La siguiente imagen muestra el funcionamiento real del sistema durante la inicia
 ```
 
 Esta arquitectura desacopla la adquisición de datos del almacenamiento, permitiendo que otros clientes puedan suscribirse al mismo tópico MQTT sin necesidad de modificar el firmware del ESP32, facilitando así la escalabilidad del sistema.
+
+## Instrucciones para ejecutar el proyecto
+
+### Requisitos
+
+- Arduino Nano ESP32
+- Acelerometro
+- Arduino IDE 2.x
+- Python 3.10 o superior
+- Broker MQTT (Mosquitto)
+- PostgreSQL
+- Librerías de Arduino:
+  - WiFi
+  - WebServer
+  - PubSubClient
+- Librerías de Python:
+  - paho-mqtt
+  - psycopg2
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/javier-sb/ev3-desarrollo-de-sw-hw.git
+cd ev3-desarrollo-de-sw-hw
+```
+
+### 2. Configurar el broker MQTT
+
+Iniciar el servicio Mosquitto y verificar que se encuentre escuchando en el puerto **1883**.
+
+### 3. Configurar PostgreSQL
+
+Crear la tabla donde se almacenarán las muestras:
+
+```sql
+CREATE TABLE daq (
+    created_at TIMESTAMP DEFAULT NOW(),
+    id INTEGER PRIMARY KEY,
+    valorx INTEGER,
+    valory INTEGER,
+    valorz INTEGER
+);
+```
+
+### 4. Configurar el ESP32
+
+Modificar en el archivo `.ino` los siguientes parámetros:
+
+- SSID y contraseña de la red Wi-Fi.
+- Dirección IP del broker MQTT.
+- Tópico MQTT.
+
+Compilar y cargar el firmware al ESP32.
+
+### 5. Configurar la aplicación Python
+
+Editar la variable `DB_URL` con las credenciales de PostgreSQL.
+
+Crear un entorno virtual e instalar las dependencias:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 6. Ejecutar el sistema
+
+1. Iniciar Mosquitto.
+2. Energizar el ESP32.
+3. Verificar que el LED de estado sea verde.
+4. Ejecutar la aplicación Python.
+5. Comprobar que las muestras comiencen a almacenarse en PostgreSQL.
+
+### 7. Visualización
+
+Conectarse al punto de acceso del ESP32 o a la misma red Wi-Fi y acceder desde un navegador a la dirección IP del ESP32 para visualizar el estado del sistema y las últimas muestras adquiridas.
